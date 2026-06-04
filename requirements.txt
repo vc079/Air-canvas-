@@ -1,3 +1,13 @@
-opencv-python
-mediapipe
-numpy
+# requirements.txt — Air Canvas dependencies
+# Install with:  pip install -r requirements.txt
+
+# Core computer vision and hand tracking
+opencv-python>=4.8.0
+mediapipe>=0.10.0
+
+# Numerical array operations (canvas layer)
+numpy>=1.24.0
+
+# Pillow is optional — only needed if you extend snapshot.py
+# to annotate images with timestamps or add filters.
+# Pillow>=10.0.0
