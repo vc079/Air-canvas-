@@ -1,94 +1,155 @@
 # Air Canvas 🎨🖐️
 
-A real-time, computer-vision virtual whiteboard. Draw, erase, and manipulate
-digital ink in the air using hand gestures — no stylus, no touchscreen.
+<p align="center">
+  <img src="docs/demo.gif" alt="Air Canvas Demo" width="850">
+</p>
 
-Built with **Python 3.7+**, **OpenCV**, and **Google MediaPipe**.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.7%2B-blue" alt="Python">
+  <img src="https://img.shields.io/badge/OpenCV-Computer%20Vision-green" alt="OpenCV">
+  <img src="https://img.shields.io/badge/MediaPipe-Hand%20Tracking-orange" alt="MediaPipe">
+  <img src="https://img.shields.io/badge/License-MIT-yellow" alt="License">
+</p>
+
+A gesture-controlled virtual whiteboard that transforms your webcam into a touchless drawing surface.
+
+Using OpenCV and MediaPipe, Air Canvas allows users to draw, erase, move, and save digital sketches in real time using only hand gestures—no touchscreen, stylus, or additional hardware required.
+
+---
+
+## 🎯 Motivation
+
+Traditional digital drawing tools require physical input devices such as a mouse, touchscreen, or stylus.
+
+Air Canvas explores a more natural form of human-computer interaction by using computer vision and hand tracking to turn free-hand gestures into digital ink. The project serves as both a practical application of real-time computer vision and an experiment in touchless interfaces.
 
 ---
 
 ## ✨ Features
 
-| Fingers | Mode | What it does |
-|--------:|------|--------------|
-| 0 (fist) | **Idle** | Pauses all tracking — move freely without drawing |
-| 1 (index) | **Draw** | Index fingertip draws continuous ink |
-| 2 (index + middle) | **Drag** | Pinch grip moves the entire canvas |
-| 3 | **Color palette** | Hover index tip over a color box to switch ink |
-| 4 | **Snapshot** | Saves canvas as `.png` (3-second anti-spam cooldown) |
-| 5 (open hand) | **Wipe eraser** | Bounding box around your hand erases ink beneath it |
+|            Fingers | Mode              | Description                                        |
+| -----------------: | ----------------- | -------------------------------------------------- |
+|           0 (Fist) | **Idle**          | Temporarily disables all drawing actions           |
+|          1 (Index) | **Draw**          | Draws continuous strokes using the index fingertip |
+| 2 (Index + Middle) | **Drag**          | Moves the entire canvas using a pinch-like gesture |
+|                  3 | **Color Palette** | Select a drawing color from the on-screen palette  |
+|                  4 | **Snapshot**      | Saves the current canvas as a PNG image            |
+|      5 (Open Hand) | **Wipe Eraser**   | Erases content beneath the detected hand region    |
 
-**Multi-hand safety** — a second hand in frame pauses all drawing and
-displays an on-screen warning until only one hand remains.
+### Additional Features
+
+* Real-time hand tracking
+* Smooth stroke interpolation
+* Canvas dragging and repositioning
+* Color palette switching
+* Snapshot saving with anti-spam cooldown
+* Multi-hand detection and safety lock
+* Modular project architecture
+* Config-driven customization
+* Unit tests for core components
 
 ---
 
-## 🛠️ Prerequisites
+## 📸 Screenshots
 
-- Python 3.7 or newer
-- A working webcam
+### Drawing Mode
+
+![Drawing](docs/screenshots/drawing.png)
+
+### Color Palette
+
+![Palette](docs/screenshots/palette.png)
+
+### Eraser Mode
+
+![Eraser](docs/screenshots/eraser.png)
 
 ---
 
-## 🚀 Installation
+## 🧰 Tech Stack
 
-```bash
-# 1. Clone or download the repository
-git clone https://github.com/your-username/air_canvas.git
-cd air_canvas
+| Component            | Technology  |
+| -------------------- | ----------- |
+| Language             | Python 3.7+ |
+| Computer Vision      | OpenCV      |
+| Hand Tracking        | MediaPipe   |
+| Numerical Processing | NumPy       |
+| Testing              | PyTest      |
 
-# 2. (Recommended) Create a virtual environment
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+---
 
-# 3. Install dependencies
-pip install -r requirements.txt
+## 🏗️ Architecture
 
-# 4. Run
-python main.py
+```text
+Webcam Feed
+     │
+     ▼
+OpenCV Frame Capture
+     │
+     ▼
+MediaPipe Hand Tracker
+     │
+     ▼
+Landmark Extraction
+     │
+     ▼
+Gesture Engine
+     │
+     ├── Draw
+     ├── Drag
+     ├── Erase
+     ├── Snapshot
+     └── Color Selection
+     │
+     ▼
+Canvas Renderer
+     │
+     ▼
+Frame Compositor
+     │
+     ▼
+Final Output Window
 ```
-
-Press **Esc** to exit cleanly.
 
 ---
 
 ## 📁 Project Structure
 
-```
+```text
 air_canvas/
-├── main.py                  # Entry point
+├── main.py
 ├── requirements.txt
 ├── README.md
 ├── .gitignore
 ├── LICENSE
 │
-├── core/                    # Logic modules
-│   ├── hand_tracker.py      # MediaPipe wrapper, landmark extraction
-│   ├── gesture_engine.py    # Finger count → mode resolver
-│   └── canvas_renderer.py   # numpy canvas + OpenCV compositing
+├── core/
+│   ├── hand_tracker.py
+│   ├── gesture_engine.py
+│   └── canvas_renderer.py
 │
-├── ui/                      # On-screen overlays
-│   ├── color_palette.py     # Color menu (3-finger mode)
-│   ├── hud_overlay.py       # Mode label, snapshot flash, drag handle
-│   ├── eraser_box.py        # Bounding-box eraser visualisation
-│   └── multi_hand_warn.py   # Warning banner for > 1 hand
+├── ui/
+│   ├── color_palette.py
+│   ├── hud_overlay.py
+│   ├── eraser_box.py
+│   └── multi_hand_warn.py
 │
-├── utils/                   # Reusable helpers
-│   ├── compositing.py       # bitwise_and / bitwise_or pipeline
-│   ├── smoothing.py         # Line interpolation for smooth strokes
-│   ├── snapshot.py          # PNG save with cooldown + flash timer
-│   └── finger_counter.py    # Y-coordinate landmark math
+├── utils/
+│   ├── compositing.py
+│   ├── smoothing.py
+│   ├── snapshot.py
+│   └── finger_counter.py
 │
-├── config/                  # Tunable constants (no magic numbers elsewhere)
-│   ├── settings.py          # Camera, window, cooldown
-│   ├── colors.py            # Palette hex values
-│   ├── gestures.py          # Finger-count → gesture name map
-│   └── camera.py            # Resolution presets
+├── config/
+│   ├── settings.py
+│   ├── colors.py
+│   ├── gestures.py
+│   └── camera.py
 │
 ├── assets/
-│   ├── icons/               # Optional UI icons
-│   ├── fonts/               # Optional custom fonts
-│   └── snapshots/           # Saved .png outputs land here
+│   ├── icons/
+│   ├── fonts/
+│   └── snapshots/
 │
 ├── tests/
 │   ├── test_gestures.py
@@ -96,8 +157,8 @@ air_canvas/
 │   └── test_snapshot.py
 │
 └── docs/
-    ├── gesture_guide.md
     ├── architecture.md
+    ├── gesture_guide.md
     └── demo.gif
 ```
 
@@ -105,46 +166,139 @@ air_canvas/
 
 ## 🧠 How It Works
 
-### Hand tracking
-MediaPipe identifies **21 3-D landmarks** on each hand. The app compares
-each fingertip's Y-coordinate against its lower knuckle to determine whether
-that finger is extended or curled.
+### Hand Tracking
 
-### Rendering pipeline
-Two layers are maintained separately:
+MediaPipe detects and tracks 21 three-dimensional landmarks for each hand.
 
-1. **Live webcam frame** — flipped horizontally so movement feels natural.
-2. **Canvas** — a pitch-black `numpy` array the same size as the frame.
+The system determines whether a finger is extended or folded by comparing the position of the fingertip with its lower joint.
+
+```text
+Tip above joint   → Finger extended
+Tip below joint   → Finger folded
+```
+
+The number of extended fingers determines the active interaction mode.
+
+---
+
+### Gesture Recognition
+
+```text
+0 Fingers → Idle
+1 Finger  → Draw
+2 Fingers → Drag Canvas
+3 Fingers → Color Selection
+4 Fingers → Save Snapshot
+5 Fingers → Erase
+```
+
+A second detected hand automatically pauses all interactions to prevent accidental input.
+
+---
+
+### Rendering Pipeline
+
+The application maintains two separate layers:
+
+1. Live webcam feed
+2. Virtual drawing canvas
+
+The webcam frame is mirrored horizontally to provide a more intuitive user experience.
+
+---
 
 ### Compositing
-On each frame:
+
+Each frame is merged with the drawing canvas using OpenCV bitwise operations.
+
+```python
+mask = cv2.bitwise_and(canvas, canvas, mask=gray_canvas)
+
+frame_cut = cv2.bitwise_and(
+    frame,
+    frame,
+    mask=cv2.bitwise_not(gray_canvas)
+)
+
+output = cv2.bitwise_or(frame_cut, mask)
 ```
-mask       = bitwise_and(canvas,  canvas,  mask=gray_canvas)
-frame_cut  = bitwise_and(frame,   frame,   mask=bitwise_not(gray_canvas))
-output     = bitwise_or (frame_cut, mask)
-```
-This carves the ink shape out of the live feed and drops the colour layer
-into those slots — creating the illusion of augmented-reality ink.
+
+This creates the illusion that the digital ink exists directly within the live camera feed.
 
 ---
 
 ## ⚙️ Configuration
 
-All tunable values are in `config/`. No magic numbers in logic files.
+All tunable values are centralized inside the `config/` directory.
 
-| File | What it controls |
-|------|-----------------|
-| `settings.py` | Camera index, resolution, window name, snapshot cooldown |
-| `colors.py` | Palette colours (hex → BGR tuples) |
-| `gestures.py` | Finger-count to gesture name mapping |
-| `camera.py` | Resolution presets (720p, 1080p, etc.) |
+| File        | Purpose                                  |
+| ----------- | ---------------------------------------- |
+| settings.py | Camera index, cooldowns, window settings |
+| colors.py   | Drawing palette definitions              |
+| gestures.py | Finger count to action mappings          |
+| camera.py   | Resolution presets                       |
+
+No magic numbers are hardcoded throughout the application logic.
+
+---
+
+## 🚀 Installation
+
+### Clone Repository
+
+```bash
+git clone https://github.com/your-username/air_canvas.git
+
+cd air_canvas
+```
+
+### Create Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+Activate:
+
+**Linux / macOS**
+
+```bash
+source .venv/bin/activate
+```
+
+**Windows**
+
+```bash
+.venv\Scripts\activate
+```
+
+### Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run
+
+```bash
+python main.py
+```
+
+Press **Esc** to exit.
 
 ---
 
 ## 🧪 Running Tests
 
+Install PyTest:
+
 ```bash
 pip install pytest
+```
+
+Run:
+
+```bash
 pytest tests/
 ```
 
@@ -152,17 +306,75 @@ pytest tests/
 
 ## 📸 Snapshots
 
-Saved automatically to `assets/snapshots/` when you hold up **4 fingers**.
-Filenames are timestamped: `snapshot_20240601_143022.png`.
+Raise four fingers to save the current canvas.
+
+Snapshots are stored inside:
+
+```text
+assets/snapshots/
+```
+
+Filename format:
+
+```text
+snapshot_YYYYMMDD_HHMMSS.png
+```
+
+A cooldown mechanism prevents repeated accidental saves.
 
 ---
 
-## 🛑 Exiting
+## ⚡ Performance Notes
 
-Make sure the camera window is active, then press **Esc**.
+Performance depends on camera resolution and hardware.
+
+Typical usage on a modern laptop:
+
+* 25–40 FPS
+* Low-latency gesture response
+* Real-time rendering at 720p
+
+For best results:
+
+* Use a well-lit environment
+* Keep only one hand visible
+* Position your hand within the camera frame
+
+---
+
+## 🧩 Challenges Solved
+
+* Reducing hand landmark jitter
+* Preventing accidental gesture activation
+* Maintaining smooth strokes in real time
+* Handling multiple hands safely
+* Efficient frame compositing for real-time performance
+
+---
+
+## 🔮 Future Improvements
+
+* Undo / Redo functionality
+* Shape drawing tools
+* Text insertion support
+* Gesture customization
+* Multi-user collaboration
+* Stroke thickness controls
+* Session persistence
+* Touchless presentation mode
+
+---
+
+## 🤝 Contributing
+
+Contributions, bug reports, and feature requests are welcome.
+
+Feel free to fork the repository and submit a pull request.
 
 ---
 
 ## 📄 License
 
-MIT — see [LICENSE](LICENSE).
+Distributed under the MIT License.
+
+See the `LICENSE` file for details.
