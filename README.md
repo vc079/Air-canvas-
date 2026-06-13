@@ -225,6 +225,106 @@ output = cv2.bitwise_or(frame_cut, mask)
 
 This creates the illusion that the digital ink exists directly within the live camera feed.
 
+## 🤝 Contributing
+
+Contributions are welcome and appreciated.
+
+Whether you'd like to fix a bug, improve performance, add a feature, enhance documentation, or improve the user interface, feel free to contribute.
+
+### Getting Started
+
+1. Fork the repository.
+2. Clone your fork locally.
+
+```bash
+git clone https://github.com/your-username/air_canvas.git
+cd air_canvas
+```
+
+3. Create a new branch for your changes.
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+4. Make your changes and ensure the project runs correctly.
+
+5. Run tests before submitting.
+
+```bash
+pytest tests/
+```
+
+6. Commit your changes with a clear commit message.
+
+```bash
+git commit -m "Add gesture smoothing improvement"
+```
+
+7. Push your branch.
+
+```bash
+git push origin feature/your-feature-name
+```
+
+8. Open a Pull Request describing:
+
+   * What changed
+   * Why it was changed
+   * Any relevant screenshots or demonstrations
+
+---
+
+### Contribution Guidelines
+
+* Keep code modular and maintainable.
+* Follow the existing project structure.
+* Avoid introducing unnecessary dependencies.
+* Add comments only where they improve clarity.
+* Update documentation when adding or changing features.
+* Include tests for new functionality whenever possible.
+
+---
+
+### Reporting Bugs
+
+If you discover a bug, please open an issue and include:
+
+* Operating system
+* Python version
+* Steps to reproduce
+* Expected behavior
+* Actual behavior
+* Screenshots or logs (if applicable)
+
+---
+
+### Feature Requests
+
+Feature suggestions are welcome.
+
+When submitting a feature request, try to explain:
+
+* The problem it solves
+* The proposed solution
+* Potential implementation ideas
+
+---
+
+### First-Time Contributors
+
+Good areas for first contributions include:
+
+* Documentation improvements
+* UI enhancements
+* Additional tests
+* Performance optimizations
+* New gesture modes
+* Bug fixes
+
+Every contribution, no matter how small, helps improve the project.
+
+
 ---
 
 ## ⚙️ Configuration
