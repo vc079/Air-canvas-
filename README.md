@@ -465,14 +465,6 @@ For best results:
 
 ---
 
-## 🤝 Contributing
-
-Contributions, bug reports, and feature requests are welcome.
-
-Feel free to fork the repository and submit a pull request.
-
----
-
 ## 📄 License
 
 Distributed under the MIT License.
