@@ -1,0 +1,21 @@
+assets/fonts/
+Drop any .ttf or .otf font file here and AssetLoader will pick it up automatically.
+Recommended free fonts
+Font
+Download
+Roboto Mono (default)
+https://fonts.google.com/specimen/Roboto+Mono
+JetBrains Mono
+https://www.jetbrains.com/lp/mono/
+Ubuntu Mono
+https://fonts.google.com/specimen/Ubuntu+Mono
+Quick install (Linux / macOS)
+# Roboto Mono
+wget -q "https://fonts.gstatic.com/s/robotomono/v23/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_3vq_ROW4.woff2" \
+     -O assets/fonts/RobotoMono-Regular.ttf
+Quick install (Windows – PowerShell)
+Invoke-WebRequest `
+  "https://github.com/googlefonts/RobotoMono/raw/main/fonts/ttf/RobotoMono-Regular.ttf" `
+  -OutFile "assets\fonts\RobotoMono-Regular.ttf"
+Fallback behaviour
+If no font file is present AssetLoader automatically searches common system font directories (DejaVu, Liberation, Ubuntu, Arial, Segoe UI). If none are found it falls back to OpenCV's built-in bitmap font with no crash or error.
