@@ -28,6 +28,8 @@ from typing import List, Optional, Tuple
 
 import cv2
 import mediapipe as mp
+import mediapipe.python.solutions as solutions
+mp.solutions = solutions
 import numpy as np
 
 
