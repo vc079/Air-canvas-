@@ -202,3 +202,21 @@ def all_modes() -> list[GestureMode]:
     """Return all gesture modes in finger-count order (0 → 5)."""
     return [meta.mode for meta in sorted(GESTURE_MAP.values(),
                                          key=lambda m: m.finger_count)]
+
+
+# ----------------------------------------------------------------------
+# Compatibility aliases expected by older modules/tests
+# ----------------------------------------------------------------------
+# Backwards-compatible mapping: finger count -> short mode name string
+FINGER_TO_MODE: dict[int, str] = {
+    0: "idle",
+    1: "draw",
+    2: "drag",
+    3: "palette",
+    4: "snapshot",
+    5: "erase",
+}
+
+# Number of consecutive frames required to confirm a mode. Tests expect
+# fast response so set to 1 by default (can be overridden in runtime config).
+DEBOUNCE_FRAMES: int = 1

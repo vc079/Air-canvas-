@@ -148,3 +148,12 @@ SHOW_HAND_LANDMARKS: bool = True
 # When a second hand enters the frame all drawing is paused and this
 # message is displayed on screen.
 MULTI_HAND_WARNING: str = "WARNING: Multiple hands detected — drawing paused"
+
+
+# ---------------------------------------------------------------------
+# Snapshot compatibility: tests and legacy code expect frame-based constants
+# ---------------------------------------------------------------------
+# Convert the cooldown seconds value into a frame count using the target FPS.
+SNAPSHOT_COOLDOWN_FRAMES: int = int(SNAPSHOT_COOLDOWN * TARGET_FPS)
+# Default flash duration in frames (HUD shutter effect). Kept short.
+SNAPSHOT_FLASH_FRAMES: int = 6
