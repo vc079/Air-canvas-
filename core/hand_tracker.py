@@ -87,21 +87,17 @@ class HandTracker:
         detection_confidence: float = 0.80,
         tracking_confidence: float = 0.75,
     ) -> None:
-        try:
-            self._mp_hands = mp.solutions.hands
-        except AttributeError as exc:
-            raise RuntimeError(
-                "Installed mediapipe does not expose mp.solutions. "
-                "This project requires the legacy MediaPipe API. "
-                "Install a compatible version with `pip install 'mediapipe<0.10.0'`."
-            ) from exc
-
+        
+        # Direct assignment utilizing our modern MediaPipe patch
+        self._mp_hands = mp.solutions.hands
+        
         self._hands = self._mp_hands.Hands(
             static_image_mode=False,
             max_num_hands=max_hands,
             min_detection_confidence=detection_confidence,
             min_tracking_confidence=tracking_confidence,
         )
+        
         # Cache the last results so callers can call accessors without
         # re-processing the same frame.
         self._last_results = None
