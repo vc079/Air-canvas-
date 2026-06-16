@@ -27,10 +27,9 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 import cv2
-import mediapipe as mp
-import mediapipe.python.solutions as solutions
-mp.solutions = solutions
 import numpy as np
+import mediapipe as mp
+from mediapipe import solutions
 
 
 # ── Types ─────────────────────────────────────────────────────────────────────
@@ -88,8 +87,8 @@ class HandTracker:
         tracking_confidence: float = 0.75,
     ) -> None:
         
-        # Direct assignment utilizing our modern MediaPipe patch
-        self._mp_hands = mp.solutions.hands
+        # We now use the directly imported solutions module
+        self._mp_hands = solutions.hands
         
         self._hands = self._mp_hands.Hands(
             static_image_mode=False,
