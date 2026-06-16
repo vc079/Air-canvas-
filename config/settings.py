@@ -55,6 +55,12 @@ DEFAULT_COLOR_NAME: str = "Cyan"
 # positions for smooth continuous lines.  False = dot-per-frame.
 SMOOTH_STROKE: bool = True
 
+# Legacy compatibility aliases for older entry-point imports.
+CAM_INDEX: int = CAMERA_INDEX
+WINDOW_NAME: str = "Air Canvas"
+STROKE_THICKNESS: int = BRUSH_THICKNESS
+DEFAULT_COLOR: str = DEFAULT_COLOR_NAME
+
 
 # ======================================================================
 # 3. HAND DETECTION  (MediaPipe Hands)

@@ -184,3 +184,12 @@ def prev_color(current: Color) -> Color:
         (i for i, c in enumerate(PALETTE) if c.name == current.name), 0
     )
     return PALETTE[(idx - 1) % len(PALETTE)]
+
+
+# Convenience mappings and defaults used by the rest of the app.
+# These names match the legacy `config.colors` API expected by imports.
+COLOR_ORDER: list[str] = [color.name for color in PALETTE]
+COLOR_BGR: dict[str, tuple[int, int, int]] = {
+    color.name: color.bgr for color in PALETTE
+}
+DEFAULT_COLOR: str = PALETTE[0].name
