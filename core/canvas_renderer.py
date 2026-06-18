@@ -26,7 +26,8 @@ Design notes
 
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import Deque, List, Optional, Tuple
+from collections import deque
 
 import cv2
 import numpy as np
@@ -37,11 +38,35 @@ from utils.smoothing import SmoothingBuffer
 from utils.compositing import composite_layers
 
 
+# Maximum number of canvas states kept on the undo stack. Each entry is a
+# full copy of the canvas array, so this caps memory use — at 1280×720×3
+# bytes (~2.7MB) per entry, 20 entries is ~55MB, a reasonable ceiling for
+# a desktop app. Older states are dropped once the cap is exceeded.
+_MAX_HISTORY = 20
+
+
 # ── CanvasRenderer ────────────────────────────────────────────────────────────
 
 class CanvasRenderer:
     """
     Manages the persistent ink layer and all drawing operations.
+
+    Undo / redo
+    -----------
+    Undo/redo operates on whole-canvas snapshots rather than individual
+    pixels or line segments. ``push_history()`` must be called by the
+    caller (``main.py``) at the boundary of each discrete user action —
+    i.e. immediately *before* a new stroke/erase/drag/clear begins, so
+    the pushed state represents "the canvas as it looked right before
+    this action." ``undo()`` then restores that prior state, and the
+    canvas as it looked *before* the undo* is pushed onto the redo stack
+    so ``redo()`` can restore it again.
+
+    A snapshot-per-action design (rather than per-pixel or per-frame) is
+    intentional: drawing is a continuous stream of small line segments,
+    and undoing one segment at a time would feel meaningless to the user
+    — pressing "z" should erase the whole last stroke, not one tiny
+    fragment of it.
 
     Parameters
     ----------
@@ -63,10 +88,19 @@ class CanvasRenderer:
         # Previous tip position; None = start of a new stroke
         self._prev_point: Optional[Tuple[int, int]] = None
         # Smoothing buffer for the current stroke
-        self._smoother = SmoothingBuffer(window=5)
+        self._smoother = SmoothingBuffer()
 
         # Drag state ────────────────────────────────────────────────
         self._last_drag_anchor: Optional[Tuple[int, int]] = None
+
+        # Undo / redo history ──────────────────────────────────────
+        # Bounded deques of full canvas snapshots (numpy arrays).
+        self._undo_stack: Deque[np.ndarray] = deque(maxlen=_MAX_HISTORY)
+        self._redo_stack: Deque[np.ndarray] = deque(maxlen=_MAX_HISTORY)
+        # Tracks whether a snapshot has already been pushed for the
+        # in-progress action, so a single stroke/erase/drag doesn't
+        # push a new history entry on every frame it spans.
+        self._action_open: bool = False
 
     # ── Color ─────────────────────────────────────────────────────────────────
 
@@ -80,6 +114,88 @@ class CanvasRenderer:
         if color_name in COLOR_BGR:
             self.color = COLOR_BGR[color_name]
             self.reset_stroke()
+
+    # ── Undo / redo ───────────────────────────────────────────────────────────
+
+    def push_history(self) -> None:
+        """
+        Snapshot the current canvas onto the undo stack, marking the start
+        of a new discrete action (stroke, erase, drag, or clear).
+
+        Safe to call once per frame while a multi-frame action is in
+        progress — internally guarded by ``_action_open`` so only the
+        *first* call for a given action actually pushes a snapshot; later
+        calls within the same continuous action are no-ops. The action is
+        considered closed (and a future call will push again) once
+        ``close_action()`` is called.
+
+        Any time a new history snapshot is successfully pushed, the redo
+        stack is cleared — the standard undo/redo convention: once the
+        user does something new, the previously-undone "future" is no
+        longer reachable.
+        """
+        if self._action_open:
+            return
+        self._undo_stack.append(self.canvas.copy())
+        self._redo_stack.clear()
+        self._action_open = True
+
+    def close_action(self) -> None:
+        """
+        Mark the current action as finished, so the next ``push_history()``
+        call starts a fresh snapshot rather than being a no-op.
+
+        Call this whenever a gesture ends (e.g. on the frame the mode
+        changes away from "draw"/"erase"/"drag", or right after a
+        single-shot action like ``clear()`` completes).
+        """
+        self._action_open = False
+
+    def undo(self) -> bool:
+        """
+        Revert the canvas to the state before the most recent action.
+
+        Returns
+        -------
+        bool
+            ``True`` if an undo was performed, ``False`` if the undo
+            stack was empty (nothing to undo).
+        """
+        if not self._undo_stack:
+            return False
+        self._redo_stack.append(self.canvas.copy())
+        self.canvas = self._undo_stack.pop()
+        self.reset_stroke()
+        self.stop_drag()
+        self._action_open = False
+        return True
+
+    def redo(self) -> bool:
+        """
+        Re-apply the most recently undone action.
+
+        Returns
+        -------
+        bool
+            ``True`` if a redo was performed, ``False`` if the redo
+            stack was empty (nothing to redo).
+        """
+        if not self._redo_stack:
+            return False
+        self._undo_stack.append(self.canvas.copy())
+        self.canvas = self._redo_stack.pop()
+        self.reset_stroke()
+        self.stop_drag()
+        self._action_open = False
+        return True
+
+    def can_undo(self) -> bool:
+        """``True`` if there is at least one action available to undo."""
+        return len(self._undo_stack) > 0
+
+    def can_redo(self) -> bool:
+        """``True`` if there is at least one undone action available to redo."""
+        return len(self._redo_stack) > 0
 
     # ── Draw ──────────────────────────────────────────────────────────────────
 
