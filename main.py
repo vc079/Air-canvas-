@@ -26,7 +26,8 @@ from config.settings import CAM_INDEX, FRAME_WIDTH, FRAME_HEIGHT, WINDOW_NAME
 
 def main() -> None:
     # ── Camera setup ──────────────────────────────────────────────────────────
-    cap = cv2.VideoCapture(CAM_INDEX)
+    # Added cv2.CAP_DSHOW to bypass Windows default privacy driver blocks
+    cap = cv2.VideoCapture(CAM_INDEX, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
 
@@ -75,14 +76,17 @@ def main() -> None:
 
                 # ── Gesture dispatch ──────────────────────────────────────────
                 if gesture == "draw":
+                    renderer.push_history()
                     tip = tracker.index_tip(landmarks)
                     renderer.draw(tip)
 
                 elif gesture == "drag":
+                    renderer.push_history()
                     midpoint = tracker.pinch_midpoint(landmarks)
                     renderer.drag(midpoint)
 
                 elif gesture == "palette":
+                    renderer.close_action()
                     tip = tracker.index_tip(landmarks)
                     new_color = palette.hover(tip)
                     if new_color:
@@ -90,15 +94,25 @@ def main() -> None:
                     frame = palette.draw(frame, renderer.color)
 
                 elif gesture == "snapshot":
+                    renderer.close_action()
                     snapshot.capture(renderer.canvas)
 
                 elif gesture == "erase":
+                    renderer.push_history()
                     bbox = tracker.hand_bbox(landmarks, frame.shape)
                     renderer.erase(bbox)
                     frame = eraser.draw(frame, bbox)
 
                 elif gesture == "idle":
+                    renderer.close_action()
                     renderer.reset_stroke()
+
+                # Reset palette dwell state whenever we are NOT in palette
+                # mode, so a stale hover candidate from a previous palette
+                # session doesn't silently carry over (e.g. instantly
+                # re-confirming a colour the moment the palette reopens).
+                #if gesture != "palette":
+                #    palette.reset_hover()
 
                 # Draw drag handle when in drag mode
                 if gesture == "drag":
@@ -106,6 +120,7 @@ def main() -> None:
                     frame = hud.draw_drag_handle(frame, mid)
 
             else:
+                renderer.close_action()
                 renderer.reset_stroke()
 
         # ── Composite canvas layer onto live feed ─────────────────────────────
@@ -118,10 +133,29 @@ def main() -> None:
 
         cv2.imshow(WINDOW_NAME, output)
 
-        # Esc key to quit
-        if cv2.waitKey(1) & 0xFF == 27:
+        # ── Keyboard shortcuts ─────────────────────────────────────────────────
+        key = cv2.waitKey(1) & 0xFF
+
+        if key == 27:  # Esc
             print("[Air Canvas] Esc pressed — shutting down.")
             break
+
+        elif key in (ord("z"), ord("Z")):
+            # Undo. Any in-progress gesture action is closed first so the
+            # undo always reverts a *complete* prior action rather than a
+            # partially-drawn stroke that hasn't been snapshotted yet.
+            renderer.close_action()
+            if renderer.undo():
+                print("[Air Canvas] Undo.")
+            else:
+                print("[Air Canvas] Nothing to undo.")
+
+        elif key in (ord("y"), ord("Y")):
+            renderer.close_action()
+            if renderer.redo():
+                print("[Air Canvas] Redo.")
+            else:
+                print("[Air Canvas] Nothing to redo.")
 
     # ── Cleanup ───────────────────────────────────────────────────────────────
     cap.release()
